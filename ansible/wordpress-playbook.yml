@@ -1,0 +1,73 @@
+---
+- hosts: wordpress
+  become: yes
+
+  handlers:
+    - name: restart apache
+      service:
+        name: apache2
+        state: restarted
+
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - php
+          - apache2
+          - libapache2-mod-php
+          - php-gd
+          - mysql-server
+          - python3-mysqldb
+          - php-mysql
+        state: latest
+        update_cache: yes
+
+    - name: Create database
+      mysql_db:
+        name: wordpress_db
+        login_user: root
+        encoding: utf8
+        collation: utf8_general_ci
+        state: present
+
+    - name: Create database user
+      mysql_user:
+        login_user: root
+        name: wordpress_user
+        password: wordpress_pass
+        priv: "wordpress_db.*:ALL"
+        state: present
+
+    - name: "Download wordpress"
+      get_url:
+        url: https://wordpress.org/latest.tar.gz
+        dest: /tmp/wordpress.tar.gz
+
+    - name: "Extract wordpress"
+      unarchive:
+        src: /tmp/wordpress.tar.gz
+        dest: /var/www/
+        remote_src: yes
+
+    - name: "Copy wordpress config"
+      copy:
+        src: /var/www/wordpress/wp-config-sample.php
+        dest: /var/www/wordpress/wp-config.php
+        remote_src: yes
+
+    - name: "Change wordpress config"
+      replace:
+        path: /var/www/wordpress/wp-config.php
+        regexp: "{{ item.regex }}"
+        replace: "{{ item.value }}"
+      with_items:
+        - { regex: "database_name_here", value: "wordpress_db" }
+        - { regex: "username_here", value: "wordpress_user" }
+        - { regex: "password_here", value: "wordpress_pass" }
+
+    - name: "Config apache"
+      copy:
+        src: /configs/000-default.conf
+        dest: /etc/apache2/sites-available/000-default.conf
+      notify:
+        - restart apache
