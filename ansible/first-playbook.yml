@@ -1,0 +1,6 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - shell: "echo 'Hello World' > /home/vagrant/world.txt"
