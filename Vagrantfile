@@ -35,15 +35,27 @@ Vagrant.configure("2") do |config|
     control.vm.provision "shell", inline: $script_ansible
   end
 
-  config.vm.define :node do |node|
-    node.vm.network "forwarded_port", guest: 80, host: 8080
-    node.vm.network "private_network", ip: "192.168.33.11"
+  config.vm.define :wordpress do |wordpress|
+    wordpress.vm.network "forwarded_port", guest: 80, host: 8080
+    wordpress.vm.network "private_network", ip: "192.168.33.11"
 
-    node.vm.provider "virtualbox" do |vb|
-      vb.name = "ansible_practice_node"
+    wordpress.vm.provider "virtualbox" do |vb|
+      vb.name = "ansible_practice_wordpress"
     end
 
-    node.vm.provision "shell",
+    wordpress.vm.provision "shell",
+      inline: "cat /configs/id_bionic.pub >> .ssh/authorized_keys"
+  end
+
+  config.vm.define :mysql do |mysql|
+    mysql.vm.network "forwarded_port", guest: 3306, host: 3306
+    mysql.vm.network "private_network", ip: "192.168.33.12"
+
+    mysql.vm.provider "virtualbox" do |vb|
+      vb.name = "ansible_practice_mysql"
+    end
+
+    mysql.vm.provision "shell",
       inline: "cat /configs/id_bionic.pub >> .ssh/authorized_keys"
   end
 end

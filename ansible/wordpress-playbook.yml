@@ -1,24 +1,19 @@
 ---
-- hosts: wordpress
+- hosts: mysql
   become: yes
 
   handlers:
-    - name: restart apache
+    - name: restart mysql
       service:
-        name: apache2
+        name: mysql
         state: restarted
 
   tasks:
     - name: Install dependencies
       apt:
         name:
-          - php
-          - apache2
-          - libapache2-mod-php
-          - php-gd
           - mysql-server
           - python3-mysqldb
-          - php-mysql
         state: latest
         update_cache: yes
 
@@ -37,6 +32,39 @@
         password: wordpress_pass
         priv: "wordpress_db.*:ALL"
         state: present
+        host: "{{ item }}"
+      with_items:
+        - 'localhost'
+        - '127.0.0.1'
+        - '192.168.33.11'
+
+    - name: "Config mysql"
+      copy:
+        src: /configs/mysqld.cnf
+        dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+      notify:
+        - restart mysql
+
+- hosts: wordpress
+  become: yes
+
+  handlers:
+    - name: restart apache
+      service:
+        name: apache2
+        state: restarted
+
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - php
+          - apache2
+          - libapache2-mod-php
+          - php-gd
+          - php-mysql
+        state: latest
+        update_cache: yes
 
     - name: "Download wordpress"
       get_url:
@@ -61,6 +89,7 @@
         regexp: "{{ item.regex }}"
         replace: "{{ item.value }}"
       with_items:
+        - { regex: "localhost", value: "192.168.33.12" }
         - { regex: "database_name_here", value: "wordpress_db" }
         - { regex: "username_here", value: "wordpress_user" }
         - { regex: "password_here", value: "wordpress_pass" }
