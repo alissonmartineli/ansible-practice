@@ -7,5 +7,4 @@
 - hosts: wordpress
   become: yes
   roles:
-    - webserver
     - wordpress
