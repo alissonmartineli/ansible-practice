@@ -1,3 +1,3 @@
 # Prática com Ansible
 
-Infraestrutura com código usando o Ansible e utilizando Vagrant para simular hosts.
+Infraestrutura com código através do Ansible e utilizando o Vagrant para simular hosts.
