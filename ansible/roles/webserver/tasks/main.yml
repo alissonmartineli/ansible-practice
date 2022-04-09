@@ -1,0 +1,11 @@
+---
+- name: Install dependencies
+  apt:
+    name:
+      - php
+      - apache2
+      - libapache2-mod-php
+      - php-gd
+      - php-mysql
+    state: latest
+    update_cache: yes
