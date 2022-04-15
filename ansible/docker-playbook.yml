@@ -2,4 +2,4 @@
 - hosts: docker
   become: yes
   roles:
-    - install_docker
+    - docker

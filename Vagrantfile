@@ -1,6 +1,8 @@
 $script_ansible = <<-SCRIPT
   apt update && \
-  apt install -y ansible
+  apt install software-properties-common -y && \
+  apt-add-repository --yes --update ppa:ansible/ansible && \
+  apt install ansible -y
 SCRIPT
 
 Vagrant.configure("2") do |config|
@@ -60,7 +62,6 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define :docker do |docker|
-    docker.vm.network "forwarded_port", guest: 3306, host: 3306
     docker.vm.network "private_network", ip: "192.168.33.13"
 
     docker.vm.provider "virtualbox" do |vb|
@@ -68,6 +69,28 @@ Vagrant.configure("2") do |config|
     end
 
     docker.vm.provision "shell",
+      inline: "cat /configs/id_bionic.pub >> .ssh/authorized_keys"
+  end
+
+  config.vm.define :docker_worker_1 do |docker_worker_1|
+    docker_worker_1.vm.network "private_network", ip: "192.168.33.14"
+
+    docker_worker_1.vm.provider "virtualbox" do |vb|
+      vb.name = "ansible_practice_docker_worker_1"
+    end
+
+    docker_worker_1.vm.provision "shell",
+      inline: "cat /configs/id_bionic.pub >> .ssh/authorized_keys"
+  end
+
+  config.vm.define :docker_worker_2 do |docker_worker_2|
+    docker_worker_2.vm.network "private_network", ip: "192.168.33.15"
+
+    docker_worker_2.vm.provider "virtualbox" do |vb|
+      vb.name = "ansible_practice_docker_worker_2"
+    end
+
+    docker_worker_2.vm.provision "shell",
       inline: "cat /configs/id_bionic.pub >> .ssh/authorized_keys"
   end
 end
