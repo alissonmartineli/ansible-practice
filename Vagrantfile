@@ -58,4 +58,16 @@ Vagrant.configure("2") do |config|
     mysql.vm.provision "shell",
       inline: "cat /configs/id_bionic.pub >> .ssh/authorized_keys"
   end
+
+  config.vm.define :docker do |docker|
+    docker.vm.network "forwarded_port", guest: 3306, host: 3306
+    docker.vm.network "private_network", ip: "192.168.33.13"
+
+    docker.vm.provider "virtualbox" do |vb|
+      vb.name = "ansible_practice_docker"
+    end
+
+    docker.vm.provision "shell",
+      inline: "cat /configs/id_bionic.pub >> .ssh/authorized_keys"
+  end
 end
