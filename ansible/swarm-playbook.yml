@@ -8,3 +8,8 @@
   become: yes
   roles:
     - docker_swarm_worker
+
+- hosts: docker
+  become: yes
+  roles:
+    - deploy_stack
